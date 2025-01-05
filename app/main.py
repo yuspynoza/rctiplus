@@ -11,8 +11,11 @@ app = FastAPI()
 def get_m3u8(url: str):
     res = httpx.get(url, headers={"Referer": "https://www.rctiplus.com/"})
     if res.text == "":
-        return ""
-    clean_path = url.rsplit("/", 1)[0]
+        raise ValueError("response null")
+
+    clean_path = url[: url.rfind("/")]
+    if clean_path[-1] != "/":
+        clean_path += "/"
 
     playlist = m3u8.loads(res.text)
 
@@ -37,7 +40,7 @@ def select_best_quality(playlist: m3u8.M3U8):
     return playlist.playlists[best].uri
 
 
-@app.get("/{name}", response_class=PlainTextResponse)
+@app.get("/{name}.m3u8", response_class=PlainTextResponse)
 def channel(name: str):
     idx = 0
 
@@ -55,7 +58,7 @@ def channel(name: str):
     res = httpx.get(
         f"https://zeus.rcti.plus/video/live/api/v1/live/{idx}/url?appierid=null",
         headers={
-            "Referer": "https://www.rctiplus.com/",
+            "Referer": "",
             "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWQiOjgyMjY2ODUsInBsIjoid2ViIiwiZGV2aWNlX2lkIjoid2ViLTY3M2M2OTBjMGQ0Y2IiLCJsdHlwZSI6ImVtYWlsIiwianRpIjoiZjE2Mzg3ZDQtYjE2OS00ZDg3LWIwYzAtYTk4MDkxYjVhYjA4IiwiaWF0IjoxNzMyMDEyMzAwfQ.qu8DtyVVj1He911SMVMsjIkhDfaxQ525Nr_BKYGd_gs",
             "apikey": "k1DzR0yYWIyZgvTvixiDHnb4Nl08wSU0",
         },
@@ -63,14 +66,8 @@ def channel(name: str):
 
     a = get_m3u8(res.json()["data"]["url"])
 
-    if isinstance(a, str):
-        return a
-
     best_url = select_best_quality(a)
 
     b = get_m3u8(best_url)
-
-    if b == "":
-        return "not found"
 
     return Response(b.dumps(), media_type="application/vnd.apple.mpegurl")
