@@ -5,6 +5,8 @@ import m3u8
 from fastapi import FastAPI, Response
 from fastapi.responses import PlainTextResponse
 
+if 
+
 app = FastAPI()
 
 
@@ -59,8 +61,8 @@ def channel(name: str):
         f"https://zeus.rcti.plus/video/live/api/v1/live/{idx}/url?appierid=null",
         headers={
             "Referer": "",
-            "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWQiOjgyMjY2ODUsInBsIjoid2ViIiwiZGV2aWNlX2lkIjoid2ViLTY3M2M2OTBjMGQ0Y2IiLCJsdHlwZSI6ImVtYWlsIiwianRpIjoiZjE2Mzg3ZDQtYjE2OS00ZDg3LWIwYzAtYTk4MDkxYjVhYjA4IiwiaWF0IjoxNzMyMDEyMzAwfQ.qu8DtyVVj1He911SMVMsjIkhDfaxQ525Nr_BKYGd_gs",
-            "apikey": "k1DzR0yYWIyZgvTvixiDHnb4Nl08wSU0",
+            "Authorization": os.getenv("SECRET_TOKEN"),
+            "apikey": os.getenv("API_KEY"),
         },
     )
 
